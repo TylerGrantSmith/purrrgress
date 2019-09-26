@@ -1,0 +1,17 @@
+Package: purrrgress
+Type: Package
+Title: Progress bars for purrr
+Version: 0.0.1
+Author: Tyler Grant Smith
+Maintainer: Tyler Grant Smith <tyler.grant.smith@gmail.com>
+Description: Modified purrr functions that add a progress bar
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    progress,
+    checkmate,
+    rlang,
+    purrr,
+    dplyr
+RoxygenNote: 6.1.0
