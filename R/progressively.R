@@ -12,7 +12,7 @@ make_progress <- function(total = 100,
 }
 
 
-.make_args <- function(args, .args, env) {
+make_args <- function(args, .args, env) {
   mapper_type <- attr(.args, 'type')
   n <- switch(
     mapper_type,
@@ -36,8 +36,9 @@ make_progress <- function(total = 100,
 
 .pbify <- function(.mapper, .args) {
   fmls <- rlang::fn_fmls(.mapper)
+
   pf <- function(...) {
-    args <- .make_args(as.list(match.call())[-1], .args, rlang::caller_env())
+    args <- make_args(as.list(match.call())[-1], .args, rlang::caller_env())
 
     pb <- make_progress(attr(args,"n"))
     g <- eval(args[[.args[['.farg']]]], rlang::caller_env())
@@ -54,17 +55,39 @@ make_progress <- function(total = 100,
   pf
 }
 
+.guess_args <- function(.mapper) {
+  args <- rlang::fn_fmls_names(.mapper)
+
+  attr(args, 'type') <- dplyr::case_when('.at' %in% args ~ '.at',
+                                         '.if' %in% args ~ '.if',
+                                         '.l'  %in% args ~ '.l' ,
+                                         '.y'  %in% args ~ '.y' ,
+                                         '.x'  %in% args ~ '.x' ,
+                                         TRUE            ~ NA_character_)
+
+  return(args)
+}
+
 .verify_args <- function(.mapper, args) {
   checkmate::assert_function(.mapper)
   checkmate::assert_subset(unlist(args, use.names = F), rlang::fn_fmls_names(.mapper))
 
+  if(length(args) == 0) {
+
+
+  }
+
   arg_names <- names(args)
-  attr(args, 'type') <-
-    dplyr::case_when('.atarg' %in% arg_names ~ '.at',
-                     '.parg'  %in% arg_names ~ '.if',
-                     '.larg'  %in% arg_names ~ '.l',
-                     '.y'     %in% arg_names ~ '.y',
-                     TRUE ~ '.x')
+
+  if(length(arg_names)==0) {
+    return(.guess_args(.mapper))
+  }
+
+  attr(args, 'type') <- dplyr::case_when('.atarg' %in% arg_names ~ '.at',
+                                         '.parg'  %in% arg_names ~ '.if',
+                                         '.larg'  %in% arg_names ~ '.l',
+                                         '.yarg'  %in% arg_names ~ '.y',
+                                         '.xarg'  %in% arg_names ~ '.x')
   return(args)
 }
 
@@ -72,17 +95,17 @@ make_progress <- function(total = 100,
 #' Helper function for generating progress bar functions
 #'
 #' @param .mapper
-#' @param .farg
-#' @param .xarg
-#' @param .yarg
-#' @param .larg
-#' @param .atarg
-#' @param .parg
+#' @param .farg `[character(1)]`\cr
+#' @param .xarg `[character(1)]`\cr
+#' @param .yarg `[character(1)]`\cr
+#' @param .larg `[character(1)]`\cr
+#' @param .atarg `[character(1)]`\cr
+#' @param .parg `[character(1)]`\cr
 #'
-#' @return
+#' @return A function wrapping .mapper
 #' @export
 #'
-#' @examples
+#' @examples progressively(map, .farg = '.f', .xarg = '.x')(rep(1,3) ~Sys.sleep(.x))
 #' @export
 progressively <- function(.mapper, .farg = NULL, .xarg = NULL,  .yarg = NULL, .larg = NULL, .atarg = NULL, .parg = NULL) {
 

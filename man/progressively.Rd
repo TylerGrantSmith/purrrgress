@@ -8,8 +8,24 @@ progressively(.mapper, .farg = NULL, .xarg = NULL, .yarg = NULL,
   .larg = NULL, .atarg = NULL, .parg = NULL)
 }
 \arguments{
-\item{.parg}{}
+\item{.farg}{`[character(1)]`\cr}
+
+\item{.xarg}{`[character(1)]`\cr}
+
+\item{.yarg}{`[character(1)]`\cr}
+
+\item{.larg}{`[character(1)]`\cr}
+
+\item{.atarg}{`[character(1)]`\cr}
+
+\item{.parg}{`[character(1)]`\cr}
+}
+\value{
+A function wrapping .mapper
 }
 \description{
 Helper function for generating progress bar functions
+}
+\examples{
+progressively(map, .farg = '.f', .xarg = '.x')(rep(1,3) ~Sys.sleep(.x))
 }
